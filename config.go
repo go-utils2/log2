@@ -161,6 +161,11 @@ func (l *Config) Build(cores ...zapcore.Core) (logger Logger, err error) {
 		return nil, errors.Wrapf(err, `加载时区[%s]`, l.TimeZone)
 	}
 
+	// 验证时间布局格式是否正确
+	if _, err = time.Parse(l.TimeLayout, time.Now().Format(l.TimeLayout)); err != nil {
+		return nil, errors.Wrapf(err, `时间布局格式[%s]无效`, l.TimeLayout)
+	}
+
 	// todo: 如何验证一个time layout 是否正确
 
 	cfg.EncoderConfig = l.newEncoderConfig()

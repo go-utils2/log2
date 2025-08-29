@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -23,6 +24,7 @@ type gormLogger struct {
 	Logger
 	slowThreshold time.Duration // 慢查询耗时阈值
 	minLevels     map[string]zapcore.Level
+	skipMapMutex  sync.RWMutex // 保护skipMap的并发安全
 }
 
 func NewGormLogger(logger Logger, slowThreshold time.Duration, minLevel map[string]zapcore.Level) logger2.Interface {
@@ -131,6 +133,9 @@ var (
 )
 
 func (l *gormLogger) AutoSkip() {
+	l.skipMapMutex.Lock()
+	defer l.skipMapMutex.Unlock()
+	
 	for i := 2; i < 15; i++ {
 		_, file, _, ok := runtime.Caller(i)
 		switch {

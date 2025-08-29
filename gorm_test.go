@@ -49,5 +49,5 @@ func TestNewLogger(t *testing.T) {
 		count int64
 	)
 
-	require.NoError(t, db.WithContext(context.WithValue(todo, ModuleKey, `test`)).Table(`user_wallet`).Count(&count).Error, `COUNT`)
+	require.NoError(t, db.WithContext(context.WithValue(context.Background(), ModuleKey, `test`)).Table(`user_wallet`).Count(&count).Error, `COUNT`)
 }

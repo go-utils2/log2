@@ -134,6 +134,10 @@ func (l *logger) Derive(s string) Logger {
 }
 
 func (l logger) With(fields ...zap.Field) Logger {
+	if l.underlying == nil {
+		return &l
+	}
+	
 	fields = append(l.fields, fields...)
 
 	return NewLogger(l.underlying.With(fields...), l.name, -1, false, false, l.levelToPath, l.duplicateKeys.Copy())
@@ -142,6 +146,10 @@ func (l logger) With(fields ...zap.Field) Logger {
 func (l logger) WithWhenNotExist(key string, field zap.Field) Logger {
 	// 判断是否存在，存在就返回l
 	if l.duplicateKeys.Exist(key) {
+		return &l
+	}
+
+	if l.underlying == nil {
 		return &l
 	}
 
@@ -159,27 +167,39 @@ func (l logger) WithWhenNotExist(key string, field zap.Field) Logger {
 }
 
 func (l logger) Info(msg string, fields ...zap.Field) {
-	l.underlying.Info(msg, fields...)
+	if l.underlying != nil {
+		l.underlying.Info(msg, fields...)
+	}
 }
 
 func (l logger) Debug(msg string, fields ...zap.Field) {
-	l.underlying.Debug(msg, fields...)
+	if l.underlying != nil {
+		l.underlying.Debug(msg, fields...)
+	}
 }
 
 func (l logger) Warn(msg string, fields ...zap.Field) {
-	l.underlying.Warn(msg, fields...)
+	if l.underlying != nil {
+		l.underlying.Warn(msg, fields...)
+	}
 }
 
 func (l logger) Error(msg string, fields ...zap.Field) {
-	l.underlying.Error(msg, fields...)
+	if l.underlying != nil {
+		l.underlying.Error(msg, fields...)
+	}
 }
 
 func (l logger) Fatal(msg string, fields ...zap.Field) {
-	l.underlying.Fatal(msg, fields...)
+	if l.underlying != nil {
+		l.underlying.Fatal(msg, fields...)
+	}
 }
 
 func (l logger) Panic(msg string, fields ...zap.Field) {
-	l.underlying.Panic(msg, fields...)
+	if l.underlying != nil {
+		l.underlying.Panic(msg, fields...)
+	}
 }
 
 func (l logger) SetLevel(level zapcore.Level) Logger {

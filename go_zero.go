@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	_ "github.com/zeromicro/go-zero/core/logc"
 	"go.uber.org/zap"
 )
 
@@ -19,6 +20,7 @@ type GoZeroLogger struct {
 // 参数:
 //   - logger: 底层日志器实例
 //   - skip: 调用栈跳过层数，默认为1
+//
 // 返回值:
 //   - *GoZeroLogger: go-zero日志适配器实例
 func NewGoZeroLogger(logger Logger, skip ...int) *GoZeroLogger {

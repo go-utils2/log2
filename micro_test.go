@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	microlog "go-micro.dev/v5/logger"
 	"github.com/stretchr/testify/require"
+	microlog "go-micro.dev/v5/logger"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
@@ -17,12 +17,12 @@ func TestNewMicroLogger(t *testing.T) {
 	logger := zap.New(core)
 	targetLogger := NewLogger(logger, "test", 0, false, false, nil, nil)
 
-	microLog := NewMicroLogger(targetLogger)
+	log := NewMicroLogger(targetLogger)
 
-	require.NotNil(t, microLog)
-	require.Equal(t, targetLogger, microLog.Logger)
-	require.NotNil(t, microLog.options)
-	require.Equal(t, "zap-micro", microLog.String())
+	require.NotNil(t, log)
+	require.Equal(t, targetLogger, log.Logger)
+	require.NotNil(t, log.options)
+	require.Equal(t, "zap-micro", log.String())
 }
 
 // TestMicroLogger_Init 测试microLogger的Init方法
@@ -41,7 +41,7 @@ func TestMicroLogger_Init(t *testing.T) {
 		option := func(o *microlog.Options) {
 			o.CallerSkipCount = 2
 		}
-		
+
 		err := microLog.Init(option)
 		require.NoError(t, err)
 		require.Equal(t, 2, microLog.options.CallerSkipCount)
@@ -54,7 +54,7 @@ func TestMicroLogger_Init(t *testing.T) {
 		option2 := func(o *microlog.Options) {
 			o.Level = microlog.DebugLevel
 		}
-		
+
 		err := microLog.Init(option1, option2)
 		require.NoError(t, err)
 		require.Equal(t, 3, microLog.options.CallerSkipCount)
@@ -78,7 +78,7 @@ func TestMicroLogger_Options(t *testing.T) {
 	t.Run("修改后的选项测试", func(t *testing.T) {
 		microLog.options.CallerSkipCount = 5
 		microLog.options.Level = microlog.WarnLevel
-		
+
 		options := microLog.Options()
 		require.Equal(t, 5, options.CallerSkipCount)
 		require.Equal(t, microlog.WarnLevel, options.Level)
@@ -97,18 +97,18 @@ func TestMicroLogger_Fields(t *testing.T) {
 			"user_id": 123,
 			"action":  "login",
 		}
-		
+
 		newLogger := microLog.Fields(fields)
 		require.NotNil(t, newLogger)
 		require.NotEqual(t, microLog, newLogger)
-		
+
 		// 测试新logger是否包含字段
 		newLogger.Log(microlog.InfoLevel, "测试消息")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, "", logs[0].Message) // Log方法使用空消息
-		
+
 		// 检查字段是否存在
 		foundUserID := false
 		foundAction := false
@@ -129,12 +129,12 @@ func TestMicroLogger_Fields(t *testing.T) {
 	t.Run("空Fields测试", func(t *testing.T) {
 		recorded.TakeAll()
 		fields := map[string]interface{}{}
-		
+
 		newLogger := microLog.Fields(fields)
 		require.NotNil(t, newLogger)
-		
+
 		newLogger.Log(microlog.InfoLevel, "空字段测试")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, "", logs[0].Message) // Log方法使用空消息
@@ -143,10 +143,10 @@ func TestMicroLogger_Fields(t *testing.T) {
 	t.Run("CallerSkipCount测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.options.CallerSkipCount = 1
-		
+
 		fields := map[string]interface{}{"test": "value"}
 		newLogger := microLog.Fields(fields)
-		
+
 		require.NotNil(t, newLogger)
 	})
 }
@@ -160,7 +160,7 @@ func TestMicroLogger_Log(t *testing.T) {
 
 	t.Run("InfoLevel测试", func(t *testing.T) {
 		microLog.Log(microlog.InfoLevel, "info消息", 123)
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, zapcore.InfoLevel, logs[0].Level)
@@ -170,7 +170,7 @@ func TestMicroLogger_Log(t *testing.T) {
 	t.Run("DebugLevel测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Log(microlog.DebugLevel, "debug消息")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, zapcore.DebugLevel, logs[0].Level)
@@ -179,7 +179,7 @@ func TestMicroLogger_Log(t *testing.T) {
 	t.Run("TraceLevel测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Log(microlog.TraceLevel, "trace消息")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, zapcore.DebugLevel, logs[0].Level) // TraceLevel映射到DebugLevel
@@ -188,7 +188,7 @@ func TestMicroLogger_Log(t *testing.T) {
 	t.Run("WarnLevel测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Log(microlog.WarnLevel, "warn消息")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, zapcore.WarnLevel, logs[0].Level)
@@ -197,7 +197,7 @@ func TestMicroLogger_Log(t *testing.T) {
 	t.Run("ErrorLevel测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Log(microlog.ErrorLevel, "error消息")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, zapcore.ErrorLevel, logs[0].Level)
@@ -207,7 +207,7 @@ func TestMicroLogger_Log(t *testing.T) {
 	// t.Run("FatalLevel测试", func(t *testing.T) {
 	// 	recorded.TakeAll()
 	// 	microLog.Log(microlog.FatalLevel, "fatal消息")
-	// 	
+	//
 	// 	logs := recorded.All()
 	// 	require.Len(t, logs, 1)
 	// 	require.Equal(t, zapcore.FatalLevel, logs[0].Level)
@@ -216,7 +216,7 @@ func TestMicroLogger_Log(t *testing.T) {
 	t.Run("未知Level测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Log(microlog.Level(100), "未知级别消息")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, zapcore.InfoLevel, logs[0].Level) // 默认映射到InfoLevel
@@ -232,7 +232,7 @@ func TestMicroLogger_Logf(t *testing.T) {
 
 	t.Run("InfoLevel格式化测试", func(t *testing.T) {
 		microLog.Logf(microlog.InfoLevel, "用户 %s 执行了 %s 操作", "admin", "登录")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, zapcore.InfoLevel, logs[0].Level)
@@ -242,7 +242,7 @@ func TestMicroLogger_Logf(t *testing.T) {
 	t.Run("DebugLevel格式化测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Logf(microlog.DebugLevel, "调试信息: %d", 42)
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, zapcore.DebugLevel, logs[0].Level)
@@ -252,7 +252,7 @@ func TestMicroLogger_Logf(t *testing.T) {
 	t.Run("TraceLevel格式化测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Logf(microlog.TraceLevel, "跟踪: %v", true)
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, zapcore.DebugLevel, logs[0].Level) // TraceLevel映射到DebugLevel
@@ -262,7 +262,7 @@ func TestMicroLogger_Logf(t *testing.T) {
 	t.Run("WarnLevel格式化测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Logf(microlog.WarnLevel, "警告: %s", "内存使用率过高")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, zapcore.WarnLevel, logs[0].Level)
@@ -272,7 +272,7 @@ func TestMicroLogger_Logf(t *testing.T) {
 	t.Run("ErrorLevel格式化测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Logf(microlog.ErrorLevel, "错误代码: %d", 500)
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, zapcore.ErrorLevel, logs[0].Level)
@@ -283,7 +283,7 @@ func TestMicroLogger_Logf(t *testing.T) {
 	// t.Run("FatalLevel格式化测试", func(t *testing.T) {
 	// 	recorded.TakeAll()
 	// 	microLog.Logf(microlog.FatalLevel, "致命错误: %s", "系统崩溃")
-	// 	
+	//
 	// 	logs := recorded.All()
 	// 	require.Len(t, logs, 1)
 	// 	require.Equal(t, zapcore.FatalLevel, logs[0].Level)
@@ -293,7 +293,7 @@ func TestMicroLogger_Logf(t *testing.T) {
 	t.Run("未知Level格式化测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Logf(microlog.Level(100), "未知: %s", "测试")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, zapcore.InfoLevel, logs[0].Level) // 默认映射到InfoLevel
@@ -303,7 +303,7 @@ func TestMicroLogger_Logf(t *testing.T) {
 	t.Run("无参数格式化测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Logf(microlog.InfoLevel, "简单消息")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Equal(t, "简单消息", logs[0].Message)
@@ -334,31 +334,31 @@ func TestMicroLogger_Integration(t *testing.T) {
 			o.Level = microlog.DebugLevel
 		})
 		require.NoError(t, err)
-		
+
 		// 添加字段
 		loggerWithFields := microLog.Fields(map[string]interface{}{
 			"service": "user-service",
 			"version": "1.0.0",
 		})
-		
+
 		// 记录不同级别的日志
 		loggerWithFields.Log(microlog.InfoLevel, "服务启动")
 		loggerWithFields.Logf(microlog.WarnLevel, "警告: %s", "配置文件缺失")
 		loggerWithFields.Log(microlog.ErrorLevel, "服务异常")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 3)
-		
+
 		// 验证第一条日志
 		require.Equal(t, zapcore.InfoLevel, logs[0].Level)
-		
+
 		// 验证第二条日志
 		require.Equal(t, zapcore.WarnLevel, logs[1].Level)
 		require.Equal(t, "警告: 配置文件缺失", logs[1].Message)
-		
+
 		// 验证第三条日志
 		require.Equal(t, zapcore.ErrorLevel, logs[2].Level)
-		
+
 		// 验证所有日志都包含字段
 		for _, log := range logs {
 			foundService := false
@@ -386,7 +386,7 @@ func TestMicroLogger_EdgeCases(t *testing.T) {
 
 	t.Run("nil值测试", func(t *testing.T) {
 		microLog.Log(microlog.InfoLevel, nil, "测试", nil)
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 	})
@@ -397,10 +397,10 @@ func TestMicroLogger_EdgeCases(t *testing.T) {
 		for i := 0; i < 100; i++ {
 			fields[fmt.Sprintf("field_%d", i)] = i
 		}
-		
+
 		loggerWithFields := microLog.Fields(fields)
 		loggerWithFields.Log(microlog.InfoLevel, "大量字段测试")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		// Log方法会添加一个额外的字段，所以总数是101
@@ -410,7 +410,7 @@ func TestMicroLogger_EdgeCases(t *testing.T) {
 	t.Run("特殊字符测试", func(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Logf(microlog.InfoLevel, "特殊字符: %s %s %s", "\n", "\t", "🚀")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 1)
 		require.Contains(t, logs[0].Message, "特殊字符:")
@@ -420,7 +420,7 @@ func TestMicroLogger_EdgeCases(t *testing.T) {
 		recorded.TakeAll()
 		microLog.Log(microlog.InfoLevel, "")
 		microLog.Logf(microlog.InfoLevel, "")
-		
+
 		logs := recorded.All()
 		require.Len(t, logs, 2)
 	})

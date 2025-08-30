@@ -49,6 +49,7 @@ type Logger interface {
 	Start() Logger
 	// SetLevel 设置级别，可以调高或者调低
 	SetLevel(level zapcore.Level) Logger
+	// AddCallerSkip
 	AddCallerSkip(skip int) Logger
 }
 
@@ -56,7 +57,6 @@ func ensureDuplicateKeys(data *Exist) *Exist {
 	if data != nil {
 		return data
 	}
-
 	return NewExist(10)
 }
 
@@ -137,7 +137,7 @@ func (l logger) With(fields ...zap.Field) Logger {
 	if l.underlying == nil {
 		return &l
 	}
-	
+
 	fields = append(l.fields, fields...)
 
 	return NewLogger(l.underlying.With(fields...), l.name, -1, false, false, l.levelToPath, l.duplicateKeys.Copy())

@@ -28,6 +28,7 @@ func (l MongoLogger) Options() *options.LoggerOptions {
 		SetMaxDocumentLength(l.maxSize).
 		SetComponentLevel(options.LogComponentCommand, options.LogLevelDebug)
 }
+
 func (l MongoLogger) Info(level int, msg string, data ...interface{}) {
 	switch options.LogLevel(level) {
 	case options.LogLevelDebug:
@@ -38,6 +39,7 @@ func (l MongoLogger) Info(level int, msg string, data ...interface{}) {
 		l.Logger.Info(msg, anyToZapFieldMongo(data...)...)
 	}
 }
+
 func (l MongoLogger) Error(err error, msg string, data ...interface{}) {
 	l.Logger.Error(msg, append(anyToZapFieldMongo(data...), zap.Error(err))...)
 }
